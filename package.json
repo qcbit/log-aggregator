@@ -1,0 +1,188 @@
+{
+  "name": "log-aggregator",
+  "description": "Select and aggregate multiple log files into a single Output channel or Terminal, tailed live.",
+  "version": "0.3.2",
+  "publisher": "LanceTruong",
+  "author": {
+    "name": "Lance Truong"
+  },
+  "displayName": "Log Aggregator",
+  "contributors": [
+    { "name": "Lance Truong" }
+  ],
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": ["Other"],
+  "activationEvents": [],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "logAggregator.start",
+        "title": "Log Aggregator: Start Following Logs"
+      },
+      {
+        "command": "logAggregator.addFiles",
+        "title": "Log Aggregator: Add Log Files"
+      },
+      {
+        "command": "logAggregator.followSelected",
+        "title": "Follow with Log Aggregator"
+      },
+      {
+        "command": "logAggregator.followSelectedInTerminal",
+        "title": "Follow with Log Aggregator (Terminal)"
+      },
+      {
+        "command": "logAggregator.removeFile",
+        "title": "Log Aggregator: Remove a Followed File"
+      },
+      {
+        "command": "logAggregator.stop",
+        "title": "Log Aggregator: Stop Following All"
+      },
+      {
+        "command": "logAggregator.toggleSink",
+        "title": "Log Aggregator: Toggle Output Channel / Terminal"
+      },
+      {
+        "command": "logAggregator.setFilter",
+        "title": "Log Aggregator: Set Include/Exclude Regex Filter"
+      },
+      {
+        "command": "logAggregator.clear",
+        "title": "Log Aggregator: Clear Output"
+      },
+      {
+        "command": "logAggregator.manage",
+        "title": "Log Aggregator: Manage Followed Files"
+      },
+      {
+        "command": "logAggregator.watchFolder",
+        "title": "Auto-Watch Folder for Logs"
+      },
+      {
+        "command": "logAggregator.unwatchFolder",
+        "title": "Log Aggregator: Stop Watching a Folder"
+      },
+      {
+        "command": "logAggregator.configureWatchExtensions",
+        "title": "Log Aggregator: Configure Watched Extensions"
+      }
+    ],
+    "configuration": {
+      "title": "Log Aggregator",
+      "properties": {
+        "logAggregator.sink": {
+          "type": "string",
+          "enum": ["output", "terminal"],
+          "default": "output",
+          "description": "Where to render aggregated log lines."
+        },
+        "logAggregator.showFilePrefix": {
+          "type": "boolean",
+          "default": true,
+          "description": "Prefix each line with the source file's short label."
+        },
+        "logAggregator.showTimestamp": {
+          "type": "boolean",
+          "default": false,
+          "description": "Prefix each line with the local time it was read."
+        },
+        "logAggregator.fromBeginning": {
+          "type": "boolean",
+          "default": false,
+          "description": "On start, read each file from the beginning instead of the end."
+        },
+        "logAggregator.includeRegex": {
+          "type": "string",
+          "default": "",
+          "description": "Only show lines matching this regex (empty = no filter)."
+        },
+        "logAggregator.excludeRegex": {
+          "type": "string",
+          "default": "",
+          "description": "Hide lines matching this regex (applied after include)."
+        },
+        "logAggregator.pollIntervalMs": {
+          "type": "number",
+          "default": 500,
+          "description": "Polling fallback interval in ms for filesystems where fs.watch is unreliable."
+        },
+        "logAggregator.watchExtensions": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [".log", ".txt"],
+          "description": "File extensions auto-watched in any watched folder. Use leading dot, lowercase. Example: ['.log', '.txt', '.out']."
+        },
+        "logAggregator.watchExcludeDirs": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": ["node_modules", ".git", ".hg", ".svn", "dist", "out", ".next", ".cache"],
+          "description": "Directory basenames skipped during folder-watching scans."
+        }
+      }
+    },
+    "keybindings": [
+      {
+        "command": "logAggregator.start",
+        "key": "ctrl+alt+l",
+        "mac": "cmd+alt+l"
+      }
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "logAggregator.followSelected",
+          "when": "!explorerResourceIsFolder",
+          "group": "7_modification@1"
+        },
+        {
+          "command": "logAggregator.followSelectedInTerminal",
+          "when": "!explorerResourceIsFolder",
+          "group": "7_modification@2"
+        },
+        {
+          "command": "logAggregator.watchFolder",
+          "when": "explorerResourceIsFolder",
+          "group": "7_modification@1"
+        }
+      ],
+      "editor/title/context": [
+        {
+          "command": "logAggregator.followSelected",
+          "group": "1_logagg"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "logAggregator.followSelected",
+          "when": "false"
+        },
+        {
+          "command": "logAggregator.followSelectedInTerminal",
+          "when": "false"
+        },
+        {
+          "command": "logAggregator.watchFolder",
+          "when": "true"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run build",
+    "build": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --target=node18 --minify",
+    "watch": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --target=node18 --sourcemap --watch",
+    "package": "vsce package --no-dependencies"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/vscode": "^1.80.0",
+    "@vscode/vsce": "^2.24.0",
+    "esbuild": "^0.20.0",
+    "typescript": "^5.3.3"
+  }
+}
